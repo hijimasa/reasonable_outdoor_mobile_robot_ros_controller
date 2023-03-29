@@ -57,10 +57,8 @@ ReasonableRobotHW::read()
   std::vector<float> read_current(motor_num_);
 
   serial_port_->readRad(rotation_amount_rad, read_speed_radps, read_current);
-  std::cout << "joint pos: ";
   for (size_t i = 0; i < motor_num_; i++) 
   {
-    //RCLCPP_INFO(rclcpp::get_logger("BlvrDriver"), "Got position %.5f, velocity %.5f for joint %d!", position_states_[i], velocity_states_[i], i);
     float diff_rotation_rad = rotation_amount_rad[i] - prev_rotation_amount_rad_[i];
     if (diff_rotation_rad > M_PI)
     {
@@ -72,13 +70,11 @@ ReasonableRobotHW::read()
     }
     prev_rotation_amount_rad_[i] = rotation_amount_rad[i];
     joint_info_[i].pos_ += diff_rotation_rad * motor_directions_[i];
-    std::cout << joint_info_[i].pos_ << ", ";
 
     joint_info_[i].vel_ = read_speed_radps[i] * motor_directions_[i];
 
     joint_info_[i].eff_ = read_current[i] * motor_directions_[i];
   }
-  std::cout << std::endl;
 
 }
 
@@ -89,13 +85,9 @@ ReasonableRobotHW::write()
 
   for (size_t i = 0; i < motor_num_; i++) 
   {
-//    RCLCPP_INFO(rclcpp::get_logger("BlvrDriver"), "Motor velocity changed: %.5f", velocity_commands_[i]);
     send_command_radps[i] = joint_info_[i].cmd_ * motor_directions_[i];
   }
   serial_port_->writeRadps(send_command_radps);
-
-  std::cout << "cmd[0], cmd[1] = " << joint_info_[0].cmd_ << ", " << joint_info_[1].cmd_ << std::endl;
-
 }
 
 bool
